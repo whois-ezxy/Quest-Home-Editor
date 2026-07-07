@@ -123,19 +123,24 @@ jobs:
           path: hsr_renderer-macos-${{ matrix.arch }}.dmg
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
     needs: [windows, linux, macos]
+    if: always() && (needs.windows.result == 'success' || needs.linux.result == 'success' || needs.macos.result == 'success')
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v4
-        with: { merge-multiple: true }
-      - uses: softprops/action-gh-release@v2
+        with: 
+          merge-multiple: true
+
+      - name: Generate Custom Release
+        uses: ncipollo/release-action@v1
         with:
-          files: |
-            hsr_renderer-windows-x64.zip
-            hsr_renderer-linux-x64.tar.gz
-            hsr_renderer-linux-x64.AppImage
-            hsr_renderer-macos-arm64.dmg
-            hsr_renderer-macos-x64.dmg
+          artifacts: "hsr_renderer-windows-x64.zip,hsr_renderer-linux-x64.tar.gz,hsr_renderer-linux-x64.AppImage,hsr_renderer-macos-x64.dmg"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: "latest-build"
+          name: "Quest Home Editor - Latest Build"
+          body: "Automated rolling prebuilt binaries compiled from your master branch."
+          allowUpdates: true
+          makeLatest: true
+          prerelease: true
