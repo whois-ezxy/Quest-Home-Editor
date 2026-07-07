@@ -84,8 +84,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: macos-15
-            arch: arm64
+          - runner: macos-15-intel
+            arch: x64
             
     runs-on: ${{ matrix.runner }}
     steps:
@@ -93,7 +93,7 @@ jobs:
       - name: Deps (MoltenVK = the Vulkan implementation on macOS; ninja)
         run: brew install ninja molten-vk
       - name: Configure
-        run: cmake -S hsr_renderer_cpp -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 -DCMAKE_OSX_ARCHITECTURES=x86_64
+        run: cmake -S hsr_renderer_cpp -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 -DCMAKE_OSX_ARCHITECTURES=x86_64 -DASTCENC_ISA_SSE41=ON -DASTCENC_NEON=OFF
       - name: Build
         run: cmake --build build --target hsr_renderer
       - name: Package dmg (.app bundle with MoltenVK beside the binary — volk dlopens it)
